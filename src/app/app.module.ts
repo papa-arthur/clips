@@ -22,7 +22,7 @@ import { NotFoundComponent } from './not-found/not-found.component';
     HomeComponent,
     AboutComponent,
     ClipComponent,
-    NotFoundComponent
+    NotFoundComponent,
   ],
   imports: [
     BrowserModule,
