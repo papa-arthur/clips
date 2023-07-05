@@ -16,6 +16,8 @@ import { AngularFireStorage } from '@angular/fire/compat/storage';
 export class ClipService {
   public clipsCollection: AngularFirestoreCollection<IClip>;
 
+  pageClips: IClip[] = [];
+  pendingRequest: boolean = false
   constructor(
     private db: AngularFirestore,
     private auth: AngularFireAuth,
@@ -37,11 +39,8 @@ export class ClipService {
           return of([]);
         }
         const query = this.clipsCollection.ref
-        .where('uid', '==', user.uid)
-        .orderBy(
-          'timestamp', 
-          sort === '1'? 'desc' : 'asc'
-        );
+          .where('uid', '==', user.uid)
+          .orderBy('timestamp', sort === '1' ? 'desc' : 'asc');
         return query.get();
       }),
       map((snapshot) => (snapshot as QuerySnapshot<IClip>).docs)
@@ -56,10 +55,44 @@ export class ClipService {
 
   async deleteClip(clip: IClip) {
     const clipRef = this.storage.ref(`clips/${clip.fileName}`);
-    const screeshotRef = this.storage.ref(`screenshots/${clip.screenshotFileName}`)
+    const screeshotRef = this.storage.ref(
+      `screenshots/${clip.screenshotFileName}`
+    );
     await clipRef.delete();
-    await screeshotRef.delete()
+    await screeshotRef.delete();
 
     await this.clipsCollection.doc(clip.docID).delete();
+  }
+
+  async getClips() {
+    
+    if(this.pendingRequest){
+      return
+    }
+    this.pendingRequest = true
+    let query = this.clipsCollection.ref
+    .orderBy('timestamp', 'desc')
+    .limit(6);
+    const { length } = this.pageClips;
+    
+    if (length > 0) {
+      
+      const lastDocID = this.pageClips[length - 1].docID;
+      const lastDoc = await this.clipsCollection
+      .doc(lastDocID)
+      .get()
+      .toPromise();
+      console.log(`last doc is ${lastDoc}`);
+      
+      query = query.startAfter(lastDoc);
+    }
+    const snapshot = await query.get()
+    snapshot.forEach(doc => {
+      this.pageClips.push({
+        docID: doc.id,
+        ...doc.data()
+      })
+    })
+    this.pendingRequest = false
   }
 }
