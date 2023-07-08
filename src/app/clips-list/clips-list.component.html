@@ -41,15 +41,15 @@
         <!-- Name & Date -->
         <p class="mb-0">
           {{ clip.displayName }} &#183;
-          <span class="text-gray-400">{{ clip.timestamp }}</span>
+          <span class="text-gray-400">{{ clip.timestamp | fbTimestamp }}</span>
         </p>
       </div>
     </a>
   </div>
-  <span
+  <!-- <span
     *ngIf="clipService.pendingRequest"
     class="material-icons text-center text-6xl p-8 animate-spin"
   >
     autorenew
-  </span>
+  </span> -->
 </div>

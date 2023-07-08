@@ -20,6 +20,9 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     VideoRoutingModule,
     SharedModule,
     ReactiveFormsModule
+  ],
+  exports: [
+    VideoRoutingModule
   ]
 })
 export class VideoModule { }
